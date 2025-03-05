@@ -14,7 +14,7 @@ import discord
 async def assign_course_roll(member):
 
     try:
-        course_roll_name = "Python"
+        course_roll_name = "Farmスタック"
 
         role_begginer = discord.utils.get(member.guild.roles, name=course_roll_name)
         await member.add_roles(role_begginer)
