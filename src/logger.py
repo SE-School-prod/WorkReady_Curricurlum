@@ -1,13 +1,18 @@
+"""
+@file logger.py
+@date 2025/03/07(金)
+@author 藤原光基
+@brief ロガー
+@bar 編集日時 編集者 編集内容
+@bar 2025/03/07(金) 藤原光基 シングルトン化することでインスタンスを一つに姓ゲインするよう修正
+"""
+
+
 import os
 import datetime
 
-from logging import ERROR, StreamHandler, FileHandler, Formatter, getLogger, DEBUG, config
-# from pytz import timezone
-import pytz
-from logging import getLogger, config, INFO, DEBUG
-
+from logging import StreamHandler, FileHandler, Formatter, getLogger, ERROR, DEBUG
 from settings.settings_dict import settings_dict
-from .logger_config import dict_config
 
 
 class DatetimeFormatter(Formatter):
@@ -22,32 +27,42 @@ class DatetimeFormatter(Formatter):
 
 class Logger:
 
-    def __init__(self):
-        self._logger = getLogger(__name__)
-        self._logger.setLevel(ERROR)
+    _instance = None
+    
+    def __new__(cls):
 
-        formatter = DatetimeFormatter(
-            "%(asctime)s -  [%(levelname)-8s] - %(filename)s:%(lineno)s %(funcName)s %(message)s")
+        if cls._instance is None:
+            cls._instance = super(Logger, cls).__new__(cls)
 
-        self._sh = StreamHandler()  # 画面出力ハンドラ
-        self._sh.setLevel(DEBUG)
-        self._sh.setFormatter(formatter)
+            logger = getLogger(__name__)
+            logger.setLevel(ERROR)
 
-        self._fh = FileHandler(
-            filename=self._generate_log_file(), encoding='utf-8')  # ファイル書き込みハンドラ
-        self._fh.setLevel(DEBUG)
-        self._fh.setFormatter(formatter)
+            formatter = DatetimeFormatter(
+                "%(asctime)s -  [%(levelname)-8s] - %(filename)s:%(lineno)s %(funcName)s %(message)s")
 
-        self._logger.addHandler(self._sh)
-        self._logger.addHandler(self._fh)
-        self._logger.propagate = False  # 大体同じ個所の処理のログ出力をひとまとめにする
+            # 画面出力用ハンドラ
+            sh = StreamHandler()
+            sh.setLevel(DEBUG)
+            sh.setFormatter(formatter)
 
-    def __del__(self):
-        self._fh.close()
-        self._sh.close()
+            # ファイル書き込みハンドラ
+            fh = FileHandler(
+                filename=cls._generate_log_file(cls), 
+                encoding='utf-8'
+            )
+            fh.setLevel(DEBUG)
+            fh.setFormatter(formatter)
+
+            if not logger.hasHandlers():
+                logger.addHandler(sh)
+                logger.addHandler(fh)
+
+            cls._instance.logger = logger
+
+        return cls._instance
 
     def get(self):
-        return self._logger
+        return self._instance.logger
 
     def _generate_log_file(self):
         now = datetime.datetime.today() + datetime.timedelta(hours=9)
@@ -56,58 +71,10 @@ class Logger:
             '-', '') + '.log'  # YYYYMMDD.log
 
         # get save dir
-        save_dir = settings_dict["DIR"]["LOG_SAVE_DIR"]
+        # save_dir = settings_dict["DIR"]["LOG_SAVE_DIR"]
+        save_dir = 'notion_api_logs'
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
         save_dir_name = os.path.join(save_dir, save_file_name)
 
         return save_dir_name
-
-    def _get_config(self):
-        self._dict_config = {
-            "version": 1,
-            "formatters": {
-                "Formatter": {
-                    "format": "%(asctime)s -  [%(levelname)-8s] - %(filename)s:%(lineno)s %(funcName)s %(message)s"
-                }
-            },
-            "handlers": {
-                "FileHandlers": {
-                    "filename": self._generate_log_file(),
-                    "class": "logging.FileHandler",
-                    "formatter": "Formatter",
-                    "level": "DEBUG",
-                },
-                "StreamHandlers": {
-                    "class": "logging.StreamHandler",
-                    "formatter": "Formatter",
-                    "level": "INFO",
-                }
-            },
-            # "loggers":{
-            #     '':{
-            #         "handlers": ["FileHandlers, StreamHandlers"],
-            #         "level": "DEBUG",
-            #         "propagate": 0
-            #     },
-            #     "server": {
-            #         "handlers": ["FileHandlers"],
-            #         "level": INFO,
-            #         "propagate": 0
-            #     }
-            # }
-            "root": {
-                "handlers": ["FileHandlers", "StreamHandlers"],
-                "level": "DEBUG",
-                "propagete": 0
-            }
-        }
-        return self._dict_config
-
-
-def main():
-    logger = Logger()
-
-
-if __name__ == '__main__':
-    main()
