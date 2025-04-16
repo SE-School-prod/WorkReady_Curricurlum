@@ -207,6 +207,51 @@ class Kintone:
 
         return response
 
+    def _get_query(self, query_infos):
+        query = ''
+        for key, value in query_infos.items():
+            if len(query) > 0:
+                query += ' '
+
+            if key == "column":
+                query_column = ''
+                for column_info in value:
+                    if len(query_column) > 0:
+                        query_column += ' and '
+                    # query_column += f'{column_info["column_name"]} {column_info["condition"]} {column_info["value"]}'
+                    query_column += f'{column_info["column_name"]} {column_info["condition"]} '
+                    if isinstance(column_info["value"], int):
+                        query_column += column_info["value"]
+                    else:
+                        query_column += f'"{column_info['value']}"'
+                query += query_column
+
+            if key == "range":
+                query_range = ''
+                for range_info in value:
+                    if len(query_range) > 0:
+                        query_range += ' and '
+                    # query_range += f'{range_info["column_name"]} {range_info["condition"]} {range_info["value"]}'
+                    query_range += f'{range_info["column_name"]} {range_info["condition"]} '
+                    if isinstance(range_info["value"], int):
+                        query_column += range_info["value"]
+                    else:
+                        query_column += f'"{range_info['value']}"'
+                if len(query) > 0:
+                    query += 'and '
+                query += query_range
+
+            if key == "order":
+                query_order = ''
+                for order_info in value:
+                    if len(query_order) == 0:
+                        query_order +='order by '
+                    else:
+                        query_order +=', '
+                    query_order += f'{order_info["column_name"]} {order_info["value"]}'
+                query += query_order
+        return query
+
     def _exchange_update_info_format(self, update_info):
         result = {}
         for key, value in update_info.items():
