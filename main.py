@@ -18,6 +18,7 @@ from discord.ext import tasks, commands
 from settings.settings_dict import settings_dict
 from src.assign_mentor_roll import assign_mentor_roll
 from src.assign_course_roll import assign_course_roll
+from src.put_instructor_id import put_instructor_id
 from src.manage_ticket import confirm_ticket
 from src.logger import Logger
 
@@ -52,6 +53,10 @@ def main():
             # TODO 講師単位に応じて分けられるよう調整が必要
             if message.channel.id == settings_dict["GUILD"]["CHANNEL"]["BUY_TICKET"]["ID"]:
                 await confirm_ticket(message)
+
+            # 初期設定チャンネル
+            elif message.channel.id == settings_dict["GUILD"]["CHANNEL"]["INIT_SETTING"]["ID"]:
+                await put_instructor_id(message)
 
     # チャンネルのメッセージ編集時時イベントハンドラ
     @bot.event

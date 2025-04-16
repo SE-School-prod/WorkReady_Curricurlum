@@ -14,8 +14,9 @@ import datetime
 
 
 KINTONE_SUBDOMAIN = os.environ["KINTONE_SUBDOMAIN"]
-KINTONE_APP_ID = int(os.environ["KINTONE_APP_ID"])
-KINTONE_API_TOKEN = os.environ["KINTONE_API_TOKEN"]
+KINTONE_APP_ID_PROGRESS_UPDATE_T = int(os.environ["KINTONE_APP_ID_PROGRESS_UPDATE_T"])
+KINTONE_API_TOKEN_PROGRESS_UPDATE_T = os.environ["KINTONE_API_TOKEN_PROGRESS_UPDATE_T"]
+YOOM_WEBHOOK_URL_UPDATE_INSTRUCTOR_ID = os.environ["YOOM_WEBHOOK_URL_UPDATE_INSTRUCTOR_ID"]
 
 
 class Kintone:
@@ -27,21 +28,12 @@ class Kintone:
         if cls._instance is None:
             cls._instance = super(Kintone, cls).__new__(cls)
             cls._url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/records.json"
-            cls._headers = {
-                "X-Cybozu-API-Token": KINTONE_API_TOKEN,
-                "Content-Type": "application/json; charset=utf-8"
-            }
 
         return cls._instance
 
-    def select(self, user_id=None, fields=None):
-        # url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/records.json"
-        # headers = {
-        #     "X-Cybozu-API-Token": KINTONE_API_TOKEN,
-        #     "Content-Type": "application/json; charset=utf-8"
-        # }
+    def select(self, app_id, user_id=None, fields=None, query_info=None):
         params = {
-            "app": KINTONE_APP_ID,
+            "app": app_id,
             "totalCount": True
         }
 
@@ -51,6 +43,9 @@ class Kintone:
 
         if fields is not None:
             params["fields"] = fields
+
+        if query_info is not None:
+            add_query = " "
 
         print(f"params: {params}")
 
@@ -68,17 +63,17 @@ class Kintone:
 
         return response
 
-    def create(self, create_info):
+    def create(self, app_id, create_info):
         url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/records.json"
         headers = {
-            "X-Cybozu-API-Token": KINTONE_API_TOKEN,
+            "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
             "Content-Type": "application/json; charset=utf-8"
         }
 
         create_data = self._exchange_update_info_format(create_info)
 
         data = {
-            "app": KINTONE_APP_ID,
+            "app": app_id,
             "record": create_data
         }
 
@@ -86,22 +81,22 @@ class Kintone:
 
         return response
 
-    def update(self, user_id, update_info):
-        # url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/records.json"  # 複数件更新時
+    def update(self, app_id, user_id, update_info):
         url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/record.json"  # 1件更新時
         headers = {
-            "X-Cybozu-API-Token": KINTONE_API_TOKEN,
+            "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
             "Content-Type": "application/json; charset=utf-8"
         }
 
         id = int(self.select(user_id, fields=["$id"])[0]["$id"]["value"])
+        print(f"id: {id}")
 
         update_data = {}
         for key, value in update_info.items():
             update_data[key] = {"value": value}
 
         data = {
-            "app": KINTONE_APP_ID,
+            "app": app_id,
             "id": id,
             "record": update_data
         }
@@ -117,11 +112,10 @@ class Kintone:
         {"user_id": user_id2, "update_info": {"column3": value3, "column4": value4}},...
     ]
     """
-    def updates(self, update_infos):
+    def updates(self, app_id, update_infos):
         url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/records.json"  # 複数件更新時
-        # url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/record.json"  # 1件更新時
         headers = {
-            "X-Cybozu-API-Token": KINTONE_API_TOKEN,
+            "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
             "Content-Type": "application/json; charset=utf-8"
         }
 
@@ -130,7 +124,7 @@ class Kintone:
                 update_info["update_info"][key] = {"value": value}
 
         data = {
-            "app": KINTONE_APP_ID,
+            "app": app_id,
             "record": update_infos
         }
 
@@ -138,13 +132,27 @@ class Kintone:
 
         return response
 
-    def _check_table_info(self):
+    def update_from_yoom(self, record_id, updated_master_id):
+        url = YOOM_WEBHOOK_URL_UPDATE_INSTRUCTOR_ID
+        payload = {
+            "$id": record_id,
+            "講師ID": updated_master_id
+        }
+        response = requests.post(url, json=payload)
+
+        try:
+            response = response.json()
+            print(f"update instructor_id response: {response}")
+        except:
+            print(f"update instructor_id status_code: {response.status_code}, error: {response.text}")
+
+    def _check_table_info(self, app_id):
         url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/app/form/fields.json"
         params = {
-            "app": KINTONE_APP_ID
+            "app": app_id
         }
         headers = {
-            "X-Cybozu-API-Token": KINTONE_API_TOKEN,
+            "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
             "Content-Type": "application/json; charset=utf-8"
         }
 
@@ -159,7 +167,7 @@ class Kintone:
             "limit": 100
         }
         headers = {
-            "X-Cybozu-API-Token": KINTONE_API_TOKEN,
+            "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
             "Content-Type": "application/json; charset=utf-8"
         }
 
