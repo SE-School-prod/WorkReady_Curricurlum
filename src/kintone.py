@@ -63,6 +63,38 @@ class Kintone:
 
         return response
 
+    def select_(self, app_id, token, query_info=None, fields=None):
+        params = {
+            "app": app_id,
+            "totalCount": True
+        }
+        headers = {
+            "X-Cybozu-API-Token": token,
+            "Content-Type": "application/json; charset=utf-8"
+        }
+
+        if fields is not None:
+            params["fields"] = fields
+
+        if query_info is not None:
+            query = self._get_query(query_info)
+            params["query"] = query
+
+        print(f"params: {params}")
+
+        response = requests.get(self._url, headers=headers, json=params)
+
+        if 200 <= response.status_code < 300:
+            response = response.json()["records"]
+
+        else:
+            response = {
+                "status_code": response.status_code,
+                "message": response.text
+            }
+
+        return response
+
     def create(self, app_id, create_info):
         url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/records.json"
         headers = {
