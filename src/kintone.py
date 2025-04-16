@@ -223,7 +223,8 @@ class Kintone:
                     if isinstance(column_info["value"], int):
                         query_column += column_info["value"]
                     else:
-                        query_column += f'"{column_info['value']}"'
+                        # query_column += f'"{column_info['value']}"'
+                        query_column += '"' + column_info['value'] + '"'
                 query += query_column
 
             if key == "range":
@@ -236,7 +237,8 @@ class Kintone:
                     if isinstance(range_info["value"], int):
                         query_column += range_info["value"]
                     else:
-                        query_column += f'"{range_info['value']}"'
+                        # query_column += f'"{range_info['value']}"'
+                        query_column += '"' + range_info['value'] + '"'
                 if len(query) > 0:
                     query += 'and '
                 query += query_range
