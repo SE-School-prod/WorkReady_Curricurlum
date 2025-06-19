@@ -24,5 +24,29 @@ settings_dict = {
                 "ID": 1358294819386163241
             }
         }
+    },
+    "KINTONE": {
+        "APP_INFOS": [
+            {
+                "APP_NAME": "生徒M",
+                "APP_ID": int(os.environ["KINTONE_APP_ID_STUDENT_M"]),
+                "TOKEN": os.environ["KINTONE_APP_TOKEN_STUDENT_M"]
+            },
+            {
+                "APP_NAME": "進捗更新T",
+                "APP_ID": int(os.environ["KINTONE_APP_ID_CURRICURUM_UPDATE_T"]),
+                "TOKEN": os.environ["KINTONE_APP_TOKEN_CURRICURUM_UPDATE_T"]
+            },
+            {
+                "APP_NAME": "講師M",
+                "APP_ID": int(os.environ["KINTONE_APP_ID_INSTRUCTOR_M"]),
+                "TOKEN": os.environ["KINTONE_APP_TOKEN_INSTRUCTOR_M"]
+            },
+            {
+                "APP_NAME": "転職EM",
+                "APP_ID": int(os.environ["KINTONE_APP_ID_TENSHOKU_EM"]),
+                "TOKEN": os.environ["KINTONE_APP_TOKEN_TENSHOKU_EM"]
+            }
+        ]
     }
 }

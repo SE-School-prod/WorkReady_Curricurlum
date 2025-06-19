@@ -134,8 +134,8 @@ def get_min_num_instructor_id():
 
     # Kintone「進捗管理T」「講師M」をすべて抽出する。
     kintone = Kintone()
-    student_infos = kintone.select_(KINTONE_APP_ID_PROGRESS_UPDATE_T, KINTONE_API_TOKEN_PROGRESS_UPDATE_T, fields=["講師ID"])
-    instructor_infos = kintone.select_(KINTONE_APP_ID_INSTRUCTOR_M, KINTONE_API_TOKEN_INSTRUCTOR_M, fields=["$id", "講師ID"])
+    student_infos = kintone.select_(KINTONE_APP_ID_PROGRESS_UPDATE_T, fields=["講師ID"])
+    instructor_infos = kintone.select_(KINTONE_APP_ID_INSTRUCTOR_M, fields=["$id", "講師ID"])
 
     # 取得結果から講師IDを抽出し、値のみを格納していく。
     for student_info in student_infos:

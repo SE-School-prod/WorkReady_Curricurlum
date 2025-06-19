@@ -12,6 +12,8 @@ import requests
 import urllib.parse
 import datetime
 
+from settings.settings_dict import settings_dict
+
 
 KINTONE_SUBDOMAIN = os.environ["KINTONE_SUBDOMAIN"]
 KINTONE_APP_ID_PROGRESS_UPDATE_T = int(os.environ["KINTONE_APP_ID_PROGRESS_UPDATE_T"])
@@ -32,6 +34,10 @@ class Kintone:
         return cls._instance
 
     def select(self, app_id, user_id=None, fields=None, query_info=None):
+        headers = {
+            "X-Cybozu-API-Token": self._get_token_from_app_id(app_id),
+            "Content-Type": "application/json; charset=utf-8"
+        }
         params = {
             "app": app_id,
             "totalCount": True
@@ -49,8 +55,7 @@ class Kintone:
 
         print(f"params: {params}")
 
-        response = requests.get(self._url, headers=self._headers, json=params)
-        # response = requests.get(url, headers=headers, json=params)
+        response = requests.get(self._url, headers=headers, json=params)
 
         if 200 <= response.status_code < 300:
             response = response.json()["records"]
@@ -63,13 +68,13 @@ class Kintone:
 
         return response
 
-    def select_(self, app_id, token, query_info=None, fields=None):
+    def select_(self, app_id, query_info=None, fields=None):
         params = {
             "app": app_id,
             "totalCount": True
         }
         headers = {
-            "X-Cybozu-API-Token": token,
+            "X-Cybozu-API-Token": self._get_token_from_app_id(app_id),
             "Content-Type": "application/json; charset=utf-8"
         }
 
@@ -98,7 +103,7 @@ class Kintone:
     def create(self, app_id, create_info):
         url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/records.json"
         headers = {
-            "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
+            "X-Cybozu-API-Token": self._get_token_from_app_id(app_id),
             "Content-Type": "application/json; charset=utf-8"
         }
 
@@ -116,7 +121,7 @@ class Kintone:
     def update(self, app_id, user_id, update_info):
         url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/record.json"  # 1件更新時
         headers = {
-            "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
+            "X-Cybozu-API-Token": self._get_token_from_app_id(app_id),
             "Content-Type": "application/json; charset=utf-8"
         }
 
@@ -147,7 +152,7 @@ class Kintone:
     def updates(self, app_id, update_infos):
         url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/records.json"  # 複数件更新時
         headers = {
-            "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
+            "X-Cybozu-API-Token": self._get_token_from_app_id(app_id),
             "Content-Type": "application/json; charset=utf-8"
         }
 
@@ -177,6 +182,19 @@ class Kintone:
             print(f"update instructor_id response: {response}")
         except:
             print(f"update instructor_id status_code: {response.status_code}, error: {response.text}")
+
+    def _get_token_from_app_id(self, app_id):
+        app_info = {}
+        app_infos = settings_dict["KINTONE"]["APP_INFOS"]
+        try:
+            for info in app_infos:
+                if info["APP_ID"] == app_id:
+                    app_info = info["TOKEN"]
+                    break
+            return app_info
+
+        except:
+            print(f"アプリケーションIDに合致するトークンが見つかりませんでした: app_id: {app_id}")
 
     def _check_table_info(self, app_id):
         url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/app/form/fields.json"

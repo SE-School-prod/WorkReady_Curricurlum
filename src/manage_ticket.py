@@ -12,6 +12,7 @@
 
 
 import datetime
+import os
 
 from pickle import FALSE
 from token import STAR
@@ -20,6 +21,7 @@ from settings.settings_dict import settings_dict
 from src.logger import Logger
 from src.kintone import Kintone
 
+KINTONE_APP_ID_CURRICURUM_UPDATE_T = int(os.environ["KINTONE_APP_ID_CURRICURUM_UPDATE_T"])
 
 """
 @func confirm_ticket
@@ -109,7 +111,7 @@ def confirm_ticket_expired(user_id):
 
         # Kintoneから対象ユーザの30分無料相談チケット枚数、およびレコード入校日を取得する。
         kintone = Kintone()
-        result = kintone.select(user_id, fields=["名前", "無料相談チケット30分", "入校日"])
+        result = kintone.select(app_id=KINTONE_APP_ID_CURRICURUM_UPDATE_T, user_id=user_id, fields=["名前", "無料相談チケット30分", "入校日"])
 
         # 取得件数が1件以外の場合はエラーログを出力する。
         if len(result) == 1:
@@ -189,7 +191,7 @@ def get_ticket_num(user_id):
     ]
 
     # Kintoneから「生徒DiscordID」に紐づくユーザ情報を
-    result = kintone.select(user_id, fields)
+    result = kintone.select(app_id=KINTONE_APP_ID_CURRICURUM_UPDATE_T, user_id=user_id, fields=fields)
 
     if len(result) == 1:
         result = result[0]
