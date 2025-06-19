@@ -16,8 +16,6 @@ from src.logger import Logger
 
 KINTONE_APP_ID_INSTRUCTOR_M = int(os.environ["KINTONE_APP_ID_INSTRUCTOR_M"])
 KINTONE_APP_ID_CURRICURUM_UPDATE_T = int(os.environ["KINTONE_APP_ID_CURRICURUM_UPDATE_T"])
-KINTONE_API_TOKEN_INSTRUCTOR_M = os.environ["KINTONE_API_TOKEN_INSTRUCTOR_M"]
-KINTONE_API_TOKEN_PROGRESS_UPDATE_T = os.environ["KINTONE_API_TOKEN_PROGRESS_UPDATE_T"]
 YOOM_WEBHOOK_URL_UPDATE_INSTRUCTOR_ID = os.environ["YOOM_WEBHOOK_URL_UPDATE_INSTRUCTOR_ID"]
 
 # 「初期設定」チャンネルにて、講師ID
@@ -111,7 +109,7 @@ def get_update_student_info(user_name: str) -> str:
     fields = []
 
     # 検索条件に合致するデータ一覧を取得する。
-    select_infos = kintone.select_(KINTONE_APP_ID_CURRICURUM_UPDATE_T, KINTONE_API_TOKEN_PROGRESS_UPDATE_T, query_info, fields)
+    select_infos = kintone.select_(KINTONE_APP_ID_CURRICURUM_UPDATE_T, query_info, fields)
     logger.info(f"select_infos: {select_infos}")
     print(f"select_infos: {select_infos}")
 
