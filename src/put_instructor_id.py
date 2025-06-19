@@ -15,7 +15,7 @@ from src.logger import Logger
 
 
 KINTONE_APP_ID_INSTRUCTOR_M = int(os.environ["KINTONE_APP_ID_INSTRUCTOR_M"])
-KINTONE_APP_ID_PROGRESS_UPDATE_T = int(os.environ["KINTONE_APP_ID_PROGRESS_UPDATE_T"])
+KINTONE_APP_ID_CURRICURUM_UPDATE_T = int(os.environ["KINTONE_APP_ID_CURRICURUM_UPDATE_T"])
 KINTONE_API_TOKEN_INSTRUCTOR_M = os.environ["KINTONE_API_TOKEN_INSTRUCTOR_M"]
 KINTONE_API_TOKEN_PROGRESS_UPDATE_T = os.environ["KINTONE_API_TOKEN_PROGRESS_UPDATE_T"]
 YOOM_WEBHOOK_URL_UPDATE_INSTRUCTOR_ID = os.environ["YOOM_WEBHOOK_URL_UPDATE_INSTRUCTOR_ID"]
@@ -111,7 +111,7 @@ def get_update_student_info(user_name: str) -> str:
     fields = []
 
     # 検索条件に合致するデータ一覧を取得する。
-    select_infos = kintone.select_(KINTONE_APP_ID_PROGRESS_UPDATE_T, KINTONE_API_TOKEN_PROGRESS_UPDATE_T, query_info, fields)
+    select_infos = kintone.select_(KINTONE_APP_ID_CURRICURUM_UPDATE_T, KINTONE_API_TOKEN_PROGRESS_UPDATE_T, query_info, fields)
     logger.info(f"select_infos: {select_infos}")
     print(f"select_infos: {select_infos}")
 
@@ -134,7 +134,7 @@ def get_min_num_instructor_id():
 
     # Kintone「進捗管理T」「講師M」をすべて抽出する。
     kintone = Kintone()
-    student_infos = kintone.select_(KINTONE_APP_ID_PROGRESS_UPDATE_T, fields=["講師ID"])
+    student_infos = kintone.select_(KINTONE_APP_ID_CURRICURUM_UPDATE_T, fields=["講師ID"])
     instructor_infos = kintone.select_(KINTONE_APP_ID_INSTRUCTOR_M, fields=["$id", "講師ID"])
 
     # 取得結果から講師IDを抽出し、値のみを格納していく。

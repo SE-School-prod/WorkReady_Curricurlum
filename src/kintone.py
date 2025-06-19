@@ -16,8 +16,6 @@ from settings.settings_dict import settings_dict
 
 
 KINTONE_SUBDOMAIN = os.environ["KINTONE_SUBDOMAIN"]
-KINTONE_APP_ID_PROGRESS_UPDATE_T = int(os.environ["KINTONE_APP_ID_PROGRESS_UPDATE_T"])
-KINTONE_API_TOKEN_PROGRESS_UPDATE_T = os.environ["KINTONE_API_TOKEN_PROGRESS_UPDATE_T"]
 YOOM_WEBHOOK_URL_UPDATE_INSTRUCTOR_ID = os.environ["YOOM_WEBHOOK_URL_UPDATE_INSTRUCTOR_ID"]
 
 
@@ -196,34 +194,34 @@ class Kintone:
         except:
             print(f"アプリケーションIDに合致するトークンが見つかりませんでした: app_id: {app_id}")
 
-    def _check_table_info(self, app_id):
-        url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/app/form/fields.json"
-        params = {
-            "app": app_id
-        }
-        headers = {
-            "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
-            "Content-Type": "application/json; charset=utf-8"
-        }
+    # def _check_table_info(self, app_id):
+    #     url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/app/form/fields.json"
+    #     params = {
+    #         "app": app_id
+    #     }
+    #     headers = {
+    #         "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
+    #         "Content-Type": "application/json; charset=utf-8"
+    #     }
 
-        response = requests.get(url, headers=headers, params=params)
+    #     response = requests.get(url, headers=headers, params=params)
 
-        return response
+    #     return response
 
-    def _check_apps_infos(self):
-        url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/apps.json"
-        params = {
-            "offset": 0,
-            "limit": 100
-        }
-        headers = {
-            "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
-            "Content-Type": "application/json; charset=utf-8"
-        }
+    # def _check_apps_infos(self):
+    #     url = f"https://{KINTONE_SUBDOMAIN}.cybozu.com/k/v1/apps.json"
+    #     params = {
+    #         "offset": 0,
+    #         "limit": 100
+    #     }
+    #     headers = {
+    #         "X-Cybozu-API-Token": KINTONE_API_TOKEN_PROGRESS_UPDATE_T,
+    #         "Content-Type": "application/json; charset=utf-8"
+    #     }
 
-        response = requests.get(url, headers=headers, params=params)
+    #     response = requests.get(url, headers=headers, params=params)
 
-        return response
+    #     return response
 
     def _get_query(self, query_infos):
         query = ''
