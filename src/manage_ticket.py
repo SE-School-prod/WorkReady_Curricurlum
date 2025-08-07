@@ -74,10 +74,10 @@ async def confirm_ticket(message):
                 f"{expiration_date_str}"
                 f"チケットを購入する場合は以下のURLよりお願いいたします。\n"
                 f"★30分有料相談チケットはこちら\n"
-                f"https://buy.stripe.com/7sI3eGfSNdks1Vu00f\n"
+                f"{os.environ["TICKET_URL_EASTCLOUD_30min"]}\n"
                 f"\n"
                 f"★60分有料相談チケットはこちら\n"
-                f"https://buy.stripe.com/8wM9D4gWR3JSeIg00g\n"
+                f"{os.environ["TICKET_URL_EASTCLOUD_60min"]}\n"
                 )
             await message.channel.send(reply)
 
@@ -121,6 +121,13 @@ def confirm_ticket_expired(user_id):
             result_created = result["入校日"]["value"]
             result_name = result["名前"]["value"]
 
+            # 作成日を取得したら、4か月を過ぎているかどうかを判定する
+            result_created_dt = datetime.datetime.strptime(result_created, "%Y-%m-%d")
+            now = datetime.datetime.now()
+
+            expiration_dt = result_created_dt + datetime.timedelta(days=124)
+            expiration_date = expiration_dt.strftime("%Y年%m月%d日")
+
             # データが登録されていない場合
             if result_ticket_free:
                 ticket_free = int(result_ticket_free)
@@ -130,25 +137,16 @@ def confirm_ticket_expired(user_id):
             # 無料相談チケットの有効期間を確認する。
             if ticket_free > 0:
 
-                # 作成日を取得したら、4か月を過ぎているかどうかを判定する
-                result_created_dt = datetime.datetime.strptime(result_created, "%Y-%m-%d")
-                now = datetime.datetime.now()
-
-                # 無料チケットが有効期限を超過した場合、無料チケットの枚数を0に更新し空の文字列を返す。
-                if now - result_created_dt > datetime.timedelta(days=124):
+                # 無料チケットが有効期限を超過した場合、無料チケットの枚数を0にする。
+                if now > expiration_dt:
                     kintone.update(user_id, update_info={'無料相談チケット30分': 0})
                     log_message = "ユーザID: {}, ユーザ名: {}, 更新日時: {}".format(user_id, result_name, now)
                     logger.info("チケットの有効期限チェックを行い、アップデート成功: {}".format(log_message))
-                    return ""
-
-                # 無料チケットが有効期限内である場合、有効期限を作成し返す。
-                else:
-                    expiration_dt = result_created_dt + datetime.timedelta(days=124)
-                    expiration_date = expiration_dt.strftime("%Y年%m月%d日")
-                    return expiration_date
 
             else:
                 logger.info("チケットの有効期限チェック不要")
+
+            return expiration_date
 
         elif len(result) == 0:
             reply = f"該当するユーザが見つかりませんでした。"
@@ -158,8 +156,6 @@ def confirm_ticket_expired(user_id):
             reply = f"該当するユーザが複数人いるため特定できませんでした。"
             logger.error(reply)
             raise reply
-        
-        return expiration_date
         
     except Exception as e:
         logger.error(e)
