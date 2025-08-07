@@ -74,10 +74,10 @@ async def confirm_ticket(message):
                 f"{expiration_date_str}"
                 f"チケットを購入する場合は以下のURLよりお願いいたします。\n"
                 f"★30分有料相談チケットはこちら\n"
-                f"{os.environ["TICKET_URL_EASTCLOUD_30min"]}\n"
+                f"{os.environ['TICKET_URL_EASTCLOUD_30min']}\n"
                 f"\n"
                 f"★60分有料相談チケットはこちら\n"
-                f"{os.environ["TICKET_URL_EASTCLOUD_60min"]}\n"
+                f"{os.environ['TICKET_URL_EASTCLOUD_60min']}\n"
                 )
             await message.channel.send(reply)
 
